@@ -1,0 +1,213 @@
+.view-all-btn:hover {
+  background-color: #f5f3ff;
+  text-decoration: underline;
+}
+
+.no-requests {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.9375rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .details-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .reference-image {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .custom-requests {
+    padding: 1.25rem;
+  }
+  
+  .request-summary {
+    flex-direction: column;
+  }
+  
+  .request-image {
+    margin-right: 0;
+    margin-bottom: 1rem;
+    width: 100%;
+    height: 120px;
+  }
+  
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .request-actions {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+  
+  .btn-text {
+    margin-left: 0;
+    text-align: center;
+  }
+}
+
+/* Animation for request cards */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.request-card {
+  animation: fadeIn 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+.request-card:nth-child(1) { animation-delay: 0.1s; }
+.request-card:nth-child(2) { animation-delay: 0.2s; }
+.request-card:nth-child(3) { animation-delay: 0.3s; }
+.request-card:nth-child(4) { animation-delay: 0.4s; }
+.request-card:nth-child(5) { animation-delay: 0.5s; }
+
+/* Loading state */
+.request-card.skeleton {
+  min-height: 150px;
+  position: relative;
+  overflow: hidden;
+}
+
+.request-card.skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0.5) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Status indicators */
+.status-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.status-pending .status-indicator {
+  background-color: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.5);
+}
+
+.status-in-progress .status-indicator {
+  background-color: #3b82f6;
+  box-shadow: 0 0 6px rgba(59, 130, 246, 0.5);
+}
+
+.status-completed .status-indicator {
+  background-color: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+}
+
+.status-cancelled .status-indicator {
+  background-color: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+}
+
+/* Tooltip for status */
+.status-tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: help;
+}
+
+.status-tooltip .tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: #1e293b;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.8125rem;
+  font-weight: normal;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.status-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Responsive table view for larger screens */
+@media (min-width: 1200px) {
+  .request-card {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+  
+  .request-summary {
+    display: table-row;
+  }
+  
+  .request-image,
+  .request-info,
+  .expand-icon {
+    display: table-cell;
+    vertical-align: top;
+    padding: 1rem;
+  }
+  
+  .request-image {
+    width: 100px;
+    padding-right: 0;
+  }
+  
+  .expand-icon {
+    width: 40px;
+    text-align: center;
+    padding-left: 0;
+  }
+  
+  .request-details {
+    display: table-row;
+  }
+  
+  .request-details > div {
+    display: table-cell;
+    padding: 0 1rem 1rem;
+  }
+}

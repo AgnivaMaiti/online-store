@@ -1,6 +1,79 @@
-# Getting Started with Create React App
+# Artwork Store
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern e-commerce platform for buying and selling artwork, built with React, Supabase, and modern web technologies.
+
+## Features
+
+- 🛍️ **Product Catalog**: Browse through a beautiful collection of artworks
+- 🔍 **Advanced Search & Filtering**: Find exactly what you're looking for with powerful search and filtering options
+- 🛒 **Shopping Cart**: Add items to cart and manage your selections
+- 🔐 **User Authentication**: Secure signup and login functionality
+- 💳 **Checkout Process**: Secure checkout with payment integration
+- ⭐ **Product Reviews**: Read and submit reviews for products
+- 👑 **Admin Dashboard**: Manage products, orders, and reviews (coming soon)
+
+## Tech Stack
+
+- **Frontend**: React, React Router, React Context API
+- **Styling**: CSS Modules, CSS Variables, Responsive Design
+- **Backend**: Supabase (Authentication & Database)
+- **UI Components**: Custom components with accessibility in mind
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v14 or higher)
+- npm (v6 or higher) or yarn
+- Supabase account (for backend services)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/artwork-store.git
+   cd artwork-store
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. **Set up environment variables**
+   Create a `.env` file in the root directory and add your Supabase credentials:
+   ```
+   REACT_APP_SUPABASE_URL=your_supabase_url
+   REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+4. **Start the development server**
+   ```bash
+   npm start
+   # or
+   yarn start
+   ```
+   This will start the development server at [http://localhost:3000](http://localhost:3000)
+
+## Project Structure
+
+```
+src/
+├── components/       # Reusable UI components
+├── contexts/        # React context providers
+├── pages/           # Page components
+│   ├── auth/        # Authentication pages
+│   └── ...
+├── styles/          # Global styles and CSS modules
+├── utils/           # Utility functions
+└── App.js          # Main application component
+```
+
+## Available Scripts
+
+In the project directory, you can run:
 
 ## Available Scripts
 
