@@ -1,3 +1,16 @@
+/*
+  Products.js - Product Management page
+
+  Purpose:
+  - Full CRUD for products: create/edit/delete products, manage stock, categories, featured flag.
+  - Provides product listing, filtering, pagination and modals for add/edit/delete.
+  - NOT responsible for purchases/payments or order processing. For purchase data see:
+      - Orders.js        -> order records, status transitions, order details
+      - AdminPayments.js -> payments/purchases table, totals, exports (CSV), reconciliation
+      - AdminPage.jsx    -> can provide the shared admin layout (header/sidebar) and route shell
+  - If you want to surface purchases on the admin UI, add a link to the Orders or Payments page from the sidebar.
+*/
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaEdit, FaTrash, FaSearch, FaFilter } from 'react-icons/fa';

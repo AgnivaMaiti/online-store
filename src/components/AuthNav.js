@@ -12,6 +12,10 @@ const AuthNav = () => {
     }
   };
 
+  // debug-only log
+  // eslint-disable-next-line no-console
+  if (process.env.NODE_ENV === 'development') console.debug('AuthNav render', user);
+
   return (
     <div className="auth-nav">
       {user ? (

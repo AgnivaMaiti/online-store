@@ -1,12 +1,82 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { FaTachometerAlt, FaBox, FaShoppingCart, FaStar, FaPaintBrush, FaUsers, FaSignOutAlt } from 'react-icons/fa';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { 
+  FaTachometerAlt, 
+  FaBox, 
+  FaShoppingCart, 
+  FaStar, 
+  FaPaintBrush, 
+  FaUsers, 
+  FaSignOutAlt, 
+  FaCreditCard,
+  FaHome
+} from 'react-icons/fa';
+import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/admin/AdminSidebar.css';
 
-const AdminSidebar = ({ activeTab, onTabChange }) => {
+const AdminSidebar = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const handleLogout = async () => {
-    // Implement logout logic here
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Failed to log out', error);
+    }
   };
+
+  // Check if a nav item is active
+  const isActive = (path) => {
+    return location.pathname === `/admin${path}` || 
+           (path !== '/' && location.pathname.startsWith(`/admin${path}`));
+  };
+
+  // Navigation items
+  const navItems = [
+    { 
+      path: '/', 
+      label: 'Dashboard', 
+      icon: <FaTachometerAlt className="nav-icon" />,
+      exact: true
+    },
+    { 
+      path: '/products', 
+      label: 'Products', 
+      icon: <FaBox className="nav-icon" />
+    },
+    { 
+      path: '/orders', 
+      label: 'Orders', 
+      icon: <FaShoppingCart className="nav-icon" />,
+      badge: 5
+    },
+    { 
+      path: '/reviews', 
+      label: 'Reviews', 
+      icon: <FaStar className="nav-icon" />,
+      badge: 3,
+      badgeVariant: 'warning'
+    },
+    { 
+      path: '/custom-requests', 
+      label: 'Custom Requests', 
+      icon: <FaPaintBrush className="nav-icon" />,
+      badge: 2
+    },
+    { 
+      path: '/payments', 
+      label: 'Payments', 
+      icon: <FaCreditCard className="nav-icon" />
+    },
+    { 
+      path: '/users', 
+      label: 'Users', 
+      icon: <FaUsers className="nav-icon" />
+    }
+  ];
 
   return (
     <aside className="admin-sidebar">
@@ -16,72 +86,32 @@ const AdminSidebar = ({ activeTab, onTabChange }) => {
       
       <nav className="sidebar-nav">
         <ul>
-          <li className={activeTab === 'dashboard' ? 'active' : ''}>
-            <button 
-              onClick={() => onTabChange('dashboard')}
-              className="nav-link"
-            >
-              <FaTachometerAlt className="nav-icon" />
-              <span>Dashboard</span>
-            </button>
-          </li>
-          
-          <li className={activeTab === 'products' ? 'active' : ''}>
-            <button 
-              onClick={() => onTabChange('products')}
-              className="nav-link"
-            >
-              <FaBox className="nav-icon" />
-              <span>Products</span>
-            </button>
-          </li>
-          
-          <li className={activeTab === 'orders' ? 'active' : ''}>
-            <button 
-              onClick={() => onTabChange('orders')}
-              className="nav-link"
-            >
-              <FaShoppingCart className="nav-icon" />
-              <span>Orders</span>
-              <span className="badge">5</span>
-            </button>
-          </li>
-          
-          <li className={activeTab === 'reviews' ? 'active' : ''}>
-            <button 
-              onClick={() => onTabChange('reviews')}
-              className="nav-link"
-            >
-              <FaStar className="nav-icon" />
-              <span>Reviews</span>
-              <span className="badge badge-warning">3</span>
-            </button>
-          </li>
-          
-          <li className={activeTab === 'custom-requests' ? 'active' : ''}>
-            <button 
-              onClick={() => onTabChange('custom-requests')}
-              className="nav-link"
-            >
-              <FaPaintBrush className="nav-icon" />
-              <span>Custom Requests</span>
-              <span className="badge">2</span>
-            </button>
-          </li>
-          
-          <li className={activeTab === 'users' ? 'active' : ''}>
-            <button 
-              onClick={() => onTabChange('users')}
-              className="nav-link"
-            >
-              <FaUsers className="nav-icon" />
-              <span>Users</span>
-            </button>
-          </li>
+          {navItems.map((item) => (
+            <li key={item.path} className={isActive(item.path) ? 'active' : ''}>
+              <NavLink 
+                to={`/admin${item.path === '/' ? '' : item.path}`}
+                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                end={item.exact}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+                {item.badge && (
+                  <span className={`badge ${item.badgeVariant ? `badge-${item.badgeVariant}` : ''}`}>
+                    {item.badge}
+                  </span>
+                )}
+              </NavLink>
+            </li>
+          ))}
         </ul>
       </nav>
       
       <div className="sidebar-footer">
+        <NavLink to="/" className="home-link">
+          <FaHome className="nav-icon" />
+          <span>Back to Site</span>
+        </NavLink>
+        
         <button onClick={handleLogout} className="logout-btn">
           <FaSignOutAlt className="logout-icon" />
           <span>Logout</span>

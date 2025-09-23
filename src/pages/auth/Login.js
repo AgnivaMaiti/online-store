@@ -1,31 +1,38 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../supabaseClient';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  
+  // Note: useAuth's signIn function is not used here; we call supabase directly.
+  // This is perfectly fine, as the onAuthStateChange listener in AuthContext
+  // will automatically update the user state for the whole app.
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent page refresh
     setError('');
     setLoading(true);
 
-    const { user, error: signInError } = await signIn(email, password);
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     if (signInError) {
       setError(signInError.message || 'Failed to sign in');
-      setLoading(false);
-      return;
+    } else if (data.user) {
+      // If user metadata contains an admin flag, redirect to admin dashboard
+      const isAdmin = data.user.user_metadata && data.user.user_metadata.is_admin;
+      navigate(isAdmin ? '/admin' : '/');
     }
-
-    if (user) {
-      navigate('/');
-    }
+    
+    setLoading(false);
   };
 
   return (
@@ -63,7 +70,8 @@ const Login = () => {
             Don't have an account? <Link to="/register">Register here</Link>
           </p>
           <p>
-            <Link to="/forgot-password">Forgot password?</Link>
+            {/* Make sure you have a route and component for this if you use it */}
+            {/* <Link to="/forgot-password">Forgot password?</Link> */}
           </p>
         </div>
       </div>

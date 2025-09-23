@@ -16,8 +16,11 @@ export default function Products({ addToCart }) {
 
   const fetchProducts = async () => {
     const { data, error } = await supabase.from("products").select("*");
-    if (error) console.log(error);
-    else setProducts(data);
+    if (error) {
+      // debug-only log
+      // eslint-disable-next-line no-console
+      if (process.env.NODE_ENV === 'development') console.error(error);
+    } else setProducts(data);
   };
 
   useEffect(() => {
@@ -148,6 +151,10 @@ export default function Products({ addToCart }) {
         ))}
         {filteredProducts.length === 0 && <p>No artworks match your filters.</p>}
       </div>
+
+      {/* debug-only log
+      // eslint-disable-next-line no-console
+      if (process.env.NODE_ENV === 'development') console.debug('Products loaded', products); */}
     </div>
   );
 }

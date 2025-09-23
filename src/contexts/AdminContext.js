@@ -4,247 +4,177 @@ import { supabase } from '../supabaseClient';
 export const AdminContext = createContext();
 
 export const AdminProvider = ({ children }) => {
-  const [users, setUsers] = useState([]);
-  const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [reviews, setReviews] = useState([]);
-  const [customRequests, setCustomRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Check if current user is admin
   const isAdmin = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
-    
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', user.id)
-      .single();
-
-    return data?.is_admin || false;
-  };
-
-  // Fetch all users
-  const fetchUsers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
       
-      if (error) throw error;
-      setUsers(data);
-    } catch (err) {
-      setError(err.message);
+      // For now, we'll consider the user an admin if they have an @example.com email
+      // In a real app, you should have a proper admin table or role-based system
+      const adminEmails = ['admin@example.com', 'your-email@example.com'];
+      return user.email && adminEmails.includes(user.email.toLowerCase());
+    } catch (error) {
+      console.error('Error in isAdmin check:', error);
+      return false;
     }
   };
 
-  // Fetch all products
-  const fetchProducts = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*');
-      
-      if (error) throw error;
-      setProducts(data);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  // Fetch all orders
+  // Fetch all orders with related data
   const fetchOrders = async () => {
     try {
-      const { data, error } = await supabase
+      setLoading(true);
+      
+      // Fetch orders with related payment and user data
+      const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
         .select(`
           *,
-          user:profiles(username),
-          order_items:order_items(*, product:products(*))
-        `);
+          payments (
+            id,
+            amount,
+            status as payment_status,
+            payment_method,
+            transaction_id,
+            created_at as payment_date
+          ),
+          profiles (
+            id,
+            email,
+            full_name
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (ordersError) throw ordersError;
       
-      if (error) throw error;
-      setOrders(data);
+      // If no orders, set empty array and return
+      if (!ordersData || ordersData.length === 0) {
+        setOrders([]);
+        return;
+      }
+
+      // Format the orders data with safe defaults
+      const formattedOrders = ordersData.map(order => {
+        // Get the most recent payment if available
+        const payment = order.payments && order.payments.length > 0 
+          ? order.payments[0] 
+          : null;
+          
+        // Get user info
+        const user = order.profiles || {};
+        
+        return {
+          id: order.id,
+          created_at: order.created_at,
+          updated_at: order.updated_at || order.created_at,
+          user_id: order.user_id,
+          total_amount: parseFloat(order.total_amount) || 0,
+          status: order.status || 'pending',
+          shipping_address: order.shipping_address || '',
+          payment_status: payment?.payment_status || 'pending',
+          
+          // User info
+          user_email: user.email || `user_${order.user_id?.substring(0, 6) || 'unknown'}`,
+          user_name: user.full_name || 'Unknown User',
+          
+          // Payment info
+          payment_id: payment?.id,
+          payment_amount: payment?.amount ? parseFloat(payment.amount) : 0,
+          payment_method: payment?.payment_method || 'unknown',
+          transaction_id: payment?.transaction_id || `order_${order.id?.substring(0, 8) || 'unknown'}`,
+          payment_date: payment?.payment_date || order.created_at,
+          
+          // Original data
+          _raw: order
+        };
+      });
+
+      setOrders(formattedOrders);
     } catch (err) {
+      console.error('Error fetching orders:', err);
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Fetch all reviews
-  const fetchReviews = async () => {
+  // Update order status and related payment status if needed
+  const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      const { data, error } = await supabase
-        .from('reviews')
-        .select(`
-          *,
-          user:profiles(username),
-          product:products(name)
-        `);
+      setLoading(true);
       
-      if (error) throw error;
-      setReviews(data);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  // Fetch custom requests
-  const fetchCustomRequests = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('custom_requests')
-        .select(`
-          *,
-          user:profiles(username)
-        `);
-      
-      if (error) throw error;
-      setCustomRequests(data);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  // Update order status
-  const updateOrderStatus = async (orderId, status) => {
-    try {
-      const { error } = await supabase
+      // Start a transaction
+      const { data: orderData, error: orderError } = await supabase
         .from('orders')
-        .update({ status })
+        .select('*')
+        .eq('id', orderId)
+        .single();
+        
+      if (orderError) throw orderError;
+      if (!orderData) throw new Error('Order not found');
+      
+      // Update the order status
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({ 
+          status: newStatus,
+          updated_at: new Date().toISOString() 
+        })
         .eq('id', orderId);
+        
+      if (updateError) throw updateError;
       
-      if (error) throw error;
+      // If the order has payments, update the payment status as well
+      if (orderData.payment_id) {
+        const { error: paymentError } = await supabase
+          .from('payments')
+          .update({
+            status: newStatus === 'cancelled' ? 'refunded' : newStatus,
+            updated_at: new Date().toISOString()
+          })
+          .eq('order_id', orderId);
+          
+        if (paymentError) console.warn('Could not update payment status:', paymentError);
+      }
+      
+      // Refresh the orders list
       await fetchOrders();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  // Toggle review approval
-  const toggleReviewApproval = async (reviewId, isApproved) => {
-    try {
-      const { error } = await supabase
-        .from('reviews')
-        .update({ is_approved: isApproved })
-        .eq('id', reviewId);
       
-      if (error) throw error;
-      await fetchReviews();
+      return { success: true };
     } catch (err) {
+      console.error('Error updating order status:', err);
       setError(err.message);
-    }
-  };
-
-  // Update custom request status
-  const updateRequestStatus = async (requestId, status) => {
-    try {
-      const { error } = await supabase
-        .from('custom_requests')
-        .update({ status })
-        .eq('id', requestId);
-      
-      if (error) throw error;
-      await fetchCustomRequests();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  // Add new product
-  const addProduct = async (product) => {
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .insert([product])
-        .select();
-      
-      if (error) throw error;
-      await fetchProducts();
-      return data[0];
-    } catch (err) {
-      setError(err.message);
-      return null;
-    }
-  };
-
-  // Update product
-  const updateProduct = async (id, updates) => {
-    try {
-      const { error } = await supabase
-        .from('products')
-        .update(updates)
-        .eq('id', id);
-      
-      if (error) throw error;
-      await fetchProducts();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  // Delete product
-  const deleteProduct = async (id) => {
-    try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
-      await fetchProducts();
-    } catch (err) {
-      setError(err.message);
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
     }
   };
 
   // Initial data fetch
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        await Promise.all([
-          fetchUsers(),
-          fetchProducts(),
-          fetchOrders(),
-          fetchReviews(),
-          fetchCustomRequests()
-        ]);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    fetchOrders();
   }, []);
+
+  // Check admin status function
+  const checkAdminStatus = async () => {
+    return await isAdmin();
+  };
 
   return (
     <AdminContext.Provider
       value={{
-        users,
-        products,
         orders,
-        reviews,
-        customRequests,
         loading,
         error,
         isAdmin,
+        checkAdminStatus,
         updateOrderStatus,
-        toggleReviewApproval,
-        updateRequestStatus,
-        addProduct,
-        updateProduct,
-        deleteProduct,
-        refetch: () => {
-          fetchUsers();
-          fetchProducts();
-          fetchOrders();
-          fetchReviews();
-          fetchCustomRequests();
-        }
+        refetch: fetchOrders
       }}
     >
       {children}
