@@ -1,544 +1,364 @@
-/*
-  Products.js - Product Management page
-
-  Purpose:
-  - Full CRUD for products: create/edit/delete products, manage stock, categories, featured flag.
-  - Provides product listing, filtering, pagination and modals for add/edit/delete.
-  - NOT responsible for purchases/payments or order processing. For purchase data see:
-      - Orders.js        -> order records, status transitions, order details
-      - AdminPayments.js -> payments/purchases table, totals, exports (CSV), reconciliation
-      - AdminPage.jsx    -> can provide the shared admin layout (header/sidebar) and route shell
-  - If you want to surface purchases on the admin UI, add a link to the Orders or Payments page from the sidebar.
-*/
-
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaPlus, FaEdit, FaTrash, FaSearch, FaFilter } from 'react-icons/fa';
-import { useAdmin } from '../../contexts/AdminContext';
+import { supabase } from '../../services/supabaseClient';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorMessage from '../../components/common/ErrorMessage';
-import Pagination from '../../components/common/Pagination';
-import '../../styles/admin/Products.css';
 
 const Products = () => {
-  const { 
-    products, 
-    loading, 
-    error, 
-    addProduct, 
-    updateProduct, 
-    deleteProduct,
-    refetch
-  } = useAdmin();
-  
-  const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({
-    category: '',
-    status: '',
-    sortBy: 'newest',
-  });
-  
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    description: '',
     price: '',
-    category: '',
-    stock: '',
     image: '',
-    featured: false,
+    rating: 0
   });
 
-  // Filter and sort products
-  const filteredProducts = products
-    .filter(product => 
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .filter(product => 
-      !filters.category || product.category === filters.category
-    )
-    .filter(product => 
-      !filters.status || 
-      (filters.status === 'inStock' && product.stock > 0) ||
-      (filters.status === 'outOfStock' && product.stock <= 0)
-    )
-    .sort((a, b) => {
-      switch (filters.sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'priceLow':
-          return a.price - b.price;
-        case 'priceHigh':
-          return b.price - a.price;
-        case 'newest':
-          return new Date(b.createdAt) - new Date(a.createdAt);
-        case 'oldest':
-          return new Date(a.createdAt) - new Date(b.createdAt);
-        default:
-          return 0;
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    console.log('Fetching products...');
+    try {
+      setLoading(true);
+      console.log('Supabase client:', supabase);
+      
+      // First, get the columns to determine the correct timestamp column
+      const { data: columns } = await supabase
+        .from('information_schema.columns')
+        .select('column_name')
+        .eq('table_name', 'products');
+      
+      console.log('Available columns:', columns);
+      
+      // Add RLS bypass header for admin operations
+      const { data, error, status } = await supabase
+        .from('products')
+        .select('*')
+        .order('id', { ascending: false });
+
+      console.log('Supabase response:', { status, data: data?.length, error });
+      
+      if (error) {
+        console.error('Supabase fetch error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw new Error(`Failed to fetch products: ${error.message}`);
       }
-    });
+      
+      setProducts(data || []);
+      setError(null);
+    } catch (err) {
+      console.error('Error in fetchProducts:', err);
+      setError(`Failed to load products: ${err.message}`);
+    } finally {
+      console.log('Fetch completed, setting loading to false');
+      setLoading(false);
+    }
+  };
 
-  // Get current products for pagination
-  const indexOfLastProduct = currentPage * itemsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
-  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-
-  // Handle pagination
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       [name]: type === 'checkbox' ? checked : value
-    });
+    }));
   };
 
-  // Handle filter changes
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters({
-      ...filters,
-      [name]: value
-    });
-    setCurrentPage(1); // Reset to first page when filters change
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      
+      // Prepare the data to send, ensuring we don't send undefined values
+      const productData = {
+        name: formData.name?.trim() || '',
+        price: parseFloat(formData.price) || 0,
+        image: formData.image?.trim() || ''
+      };
+
+      console.log('Submitting product data:', productData);
+      
+      if (editingProduct) {
+        console.log('Updating product:', editingProduct.id);
+        const { data, error } = await supabase
+          .from('products')
+          .update(productData)
+          .eq('id', editingProduct.id)
+          .select()
+          .single();
+        
+        if (error) {
+          console.error('Update error:', {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          });
+          throw new Error(`Failed to update product: ${error.message}`);
+        }
+        console.log('Update successful:', data);
+      } else {
+        console.log('Creating new product');
+        const { data, error } = await supabase
+          .from('products')
+          .insert([productData])
+          .select()
+          .single();
+        
+        if (error) {
+          console.error('Create error:', {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          });
+          throw new Error(`Failed to create product: ${error.message}`);
+        }
+        console.log('Create successful:', data);
+      }
+      
+      setShowForm(false);
+      setEditingProduct(null);
+      setFormData({
+        name: '',
+        description: '',
+        price: '',
+        image: '',
+        rating: 0
+      });
+      
+      await fetchProducts();
+      setError(null);
+    } catch (err) {
+      console.error('Error saving product:', err);
+      setError(err.message || `Failed to ${editingProduct ? 'update' : 'create'} product. Please try again.`);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Reset filters
-  const resetFilters = () => {
-    setFilters({
-      category: '',
-      status: '',
-      sortBy: 'newest',
+  const handleEdit = (product) => {
+    console.log('Editing product:', product);
+    setEditingProduct(product);
+    setFormData({
+      name: product.name || '',
+      price: product.price !== undefined && product.price !== null ? product.price.toString() : '',
+      image: product.image || '',
+      rating: product.rating || 0
     });
-    setSearchTerm('');
-    setCurrentPage(1);
+    setShowForm(true);
   };
 
-  // Open add product modal
-  const openAddModal = () => {
-    setSelectedProduct(null);
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+    
+    try {
+      setLoading(true);
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      await fetchProducts();
+      setError(null);
+    } catch (err) {
+      console.error('Error deleting product:', err);
+      setError('Failed to delete product. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetForm = () => {
     setFormData({
       name: '',
       description: '',
       price: '',
       category: '',
-      stock: '',
-      image: '',
-      featured: false,
+      image_url: '',
+      stock_quantity: 0,
+      is_featured: false,
+      created_at: new Date().toISOString(),
     });
-    setIsAddModalOpen(true);
+    setEditingProduct(null);
+    setShowForm(false);
   };
 
-  // Open edit product modal
-  const openEditModal = (product) => {
-    setSelectedProduct(product);
-    setFormData({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      category: product.category,
-      stock: product.stock,
-      image: product.image,
-      featured: product.featured || false,
-    });
-    setIsAddModalOpen(true);
-  };
-
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const productData = {
-        ...formData,
-        price: parseFloat(formData.price),
-        stock: parseInt(formData.stock, 10),
-      };
-      
-      if (selectedProduct) {
-        await updateProduct(selectedProduct.id, productData);
-      } else {
-        await addProduct(productData);
-      }
-      
-      setIsAddModalOpen(false);
-      refetch();
-    } catch (err) {
-      console.error('Error saving product:', err);
-    }
-  };
-
-  // Handle product deletion
-  const handleDelete = async () => {
-    if (!selectedProduct) return;
-    
-    try {
-      await deleteProduct(selectedProduct.id);
-      setIsDeleteModalOpen(false);
-      refetch();
-    } catch (err) {
-      console.error('Error deleting product:', err);
-    }
-  };
-
-  // Confirm delete
-  const confirmDelete = (product) => {
-    setSelectedProduct(product);
-    setIsDeleteModalOpen(true);
-  };
-
-  // Close all modals
-  const closeModals = () => {
-    setIsAddModalOpen(false);
-    setIsDeleteModalOpen(false);
-    setSelectedProduct(null);
-  };
-
-  // Fetch products on component mount
-  useEffect(() => {
-    refetch();
-  }, []);
-
-  if (loading) return <LoadingSpinner fullPage />;
-  if (error) return <ErrorMessage message={error} onRetry={refetch} />;
-
+  console.log('Rendering Products component', { loading, products, error });
+  
   return (
-    <div className="products-admin">
-      <div className="products-header">
-        <h2>Products Management</h2>
-        <button 
-          className="btn btn-primary"
-          onClick={openAddModal}
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-6">Products Management</h1>
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Products</h2>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
-          <FaPlus className="btn-icon" /> Add Product
+          {showForm ? 'Cancel' : 'Add New Product'}
         </button>
       </div>
 
-      <div className="products-toolbar">
-        <div className="search-box">
-          <FaSearch className="search-icon" />
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        
-        <div className="filters-container">
-          <button 
-            className="btn btn-outline"
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <FaFilter className="btn-icon" /> Filters
-          </button>
-          
-          {showFilters && (
-            <div className="filters-dropdown">
-              <div className="filter-group">
-                <label>Category</label>
-                <select 
-                  name="category"
-                  value={filters.category}
-                  onChange={handleFilterChange}
-                >
-                  <option value="">All Categories</option>
-                  <option value="painting">Paintings</option>
-                  <option value="sculpture">Sculptures</option>
-                  <option value="photography">Photography</option>
-                  <option value="digital">Digital Art</option>
-                </select>
-              </div>
-              
-              <div className="filter-group">
-                <label>Status</label>
-                <select 
-                  name="status"
-                  value={filters.status}
-                  onChange={handleFilterChange}
-                >
-                  <option value="">All Status</option>
-                  <option value="inStock">In Stock</option>
-                  <option value="outOfStock">Out of Stock</option>
-                </select>
-              </div>
-              
-              <div className="filter-group">
-                <label>Sort By</label>
-                <select 
-                  name="sortBy"
-                  value={filters.sortBy}
-                  onChange={handleFilterChange}
-                >
-                  <option value="newest">Newest</option>
-                  <option value="oldest">Oldest</option>
-                  <option value="name">Name (A-Z)</option>
-                  <option value="priceLow">Price (Low to High)</option>
-                  <option value="priceHigh">Price (High to Low)</option>
-                </select>
-              </div>
-              
-              <button 
-                className="btn btn-text"
-                onClick={resetFilters}
-              >
-                Reset Filters
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+      {error && <ErrorMessage message={error} />}
 
-      <div className="products-table-container">
-        {filteredProducts.length === 0 ? (
-          <div className="empty-state">
-            <p>No products found. Try adjusting your search or filters.</p>
-            <button 
-              className="btn btn-primary"
-              onClick={resetFilters}
-            >
-              Reset Filters
-            </button>
-          </div>
-        ) : (
-          <>
-            <table className="products-table">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Category</th>
-                  <th>Price</th>
-                  <th>Stock</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentProducts.map((product) => (
-                  <tr key={product.id}>
-                    <td>
-                      <div className="product-info">
-                        <div 
-                          className="product-image"
-                          style={{ backgroundImage: `url(${product.image})` }}
-                        ></div>
-                        <div>
-                          <div className="product-name">{product.name}</div>
-                          <div className="product-description">
-                            {product.description.substring(0, 50)}...
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="category">
-                      <span className={`category-badge ${product.category || 'uncategorized'}`}>
-                        {product.category || 'Uncategorized'}
-                      </span>
-                      {product.featured && (
-                        <span className="featured-badge">Featured</span>
-                      )}
-                    </td>
-                    <td className="price">${product.price.toFixed(2)}</td>
-                    <td className="stock">
-                      <span className={`stock-badge ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}`}>
-                        {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
-                      </span>
-                      <span className="stock-count">({product.stock})</span>
-                    </td>
-                    <td>
-                      <span className={`status-badge ${product.status || 'active'}`}>
-                        {product.status === 'draft' ? 'Draft' : 'Active'}
-                      </span>
-                    </td>
-                    <td className="actions">
-                      <button 
-                        className="btn-icon"
-                        onClick={() => openEditModal(product)}
-                        title="Edit"
-                      >
-                        <FaEdit />
-                      </button>
-                      <button 
-                        className="btn-icon danger"
-                        onClick={() => confirmDelete(product)}
-                        title="Delete"
-                      >
-                        <FaTrash />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            
-            {totalPages > 1 && (
-              <div className="pagination-container">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={paginate}
-                />
-              </div>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Add/Edit Product Modal */}
-      {isAddModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-header">
-              <h3>{selectedProduct ? 'Edit Product' : 'Add New Product'}</h3>
-              <button className="close-btn" onClick={closeModals}>&times;</button>
-            </div>
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label>Product Name</label>
+      {showForm && (
+        <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+          <h3 className="text-xl font-semibold mb-4">
+            {editingProduct ? 'Edit Product' : 'Add New Product'}
+          </h3>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Name</label>
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                  minLength="1"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Price</label>
+                <input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  step="0.01"
+                  min="0"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   required
                 />
               </div>
               
-              <div className="form-group">
-                <label>Description</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">Image URL</label>
+                <input
+                  type="url"
+                  name="image"
+                  value={formData.image}
                   onChange={handleInputChange}
-                  rows="4"
-                  required
-                ></textarea>
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
               </div>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Price ($)</label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleInputChange}
-                    min="0"
-                    step="0.01"
-                    required
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Stock</label>
-                  <input
-                    type="number"
-                    name="stock"
-                    value={formData.stock}
-                    onChange={handleInputChange}
-                    min="0"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Category</label>
-                  <select
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select Category</option>
-                    <option value="painting">Paintings</option>
-                    <option value="sculpture">Sculptures</option>
-                    <option value="photography">Photography</option>
-                    <option value="digital">Digital Art</option>
-                  </select>
-                </div>
-                
-                <div className="form-group">
-                  <label>Image URL</label>
-                  <input
-                    type="url"
-                    name="image"
-                    value={formData.image}
-                    onChange={handleInputChange}
-                    placeholder="https://example.com/image.jpg"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="form-group checkbox-group">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="featured"
-                    checked={formData.featured}
-                    onChange={handleInputChange}
-                  />
-                  <span>Featured Product</span>
-                </label>
-              </div>
-              
-              <div className="form-actions">
-                <button 
-                  type="button" 
-                  className="btn btn-outline"
-                  onClick={closeModals}
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  className="btn btn-primary"
-                >
-                  {selectedProduct ? 'Update Product' : 'Add Product'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-      
-      {/* Delete Confirmation Modal */}
-      {isDeleteModalOpen && selectedProduct && (
-        <div className="modal-overlay">
-          <div className="modal delete-modal">
-            <div className="modal-header">
-              <h3>Delete Product</h3>
-              <button className="close-btn" onClick={closeModals}>&times;</button>
             </div>
-            <div className="modal-body">
-              <p>Are you sure you want to delete "{selectedProduct.name}"? This action cannot be undone.</p>
-            </div>
-            <div className="modal-actions">
-              <button 
-                className="btn btn-outline"
-                onClick={closeModals}
+            
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                type="button"
+                onClick={resetForm}
+                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Cancel
               </button>
-              <button 
-                className="btn btn-danger"
-                onClick={handleDelete}
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
-                Delete
+                {loading ? 'Saving...' : 'Save Product'}
               </button>
             </div>
+          </form>
+        </div>
+      )}
+
+      {loading && !showForm ? (
+        <div className="flex justify-center items-center h-64">
+          <LoadingSpinner />
+        </div>
+      ) : (
+        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Image
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Price
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Rating
+                  </th>
+                  <th scope="col" className="relative px-6 py-3">
+                    <span className="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {products.length > 0 ? (
+                  products.map((product) => (
+                    <tr key={product.id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {product.image_url ? (
+                          <img 
+                            src={product.image_url} 
+                            alt={product.name} 
+                            className="h-10 w-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                            <span className="text-gray-400 text-xs">No Image</span>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">₹{parseFloat(product.price || 0).toFixed(2)}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-900">{product.rating || '0'}</span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          onClick={() => handleEdit(product)}
+                          className="text-blue-600 hover:text-blue-900 mr-3"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(product.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="7" className="px-6 py-4 text-center text-sm text-gray-500">
+                      No products found. Add your first product to get started.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

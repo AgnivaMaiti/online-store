@@ -1,32 +1,10 @@
 import React from 'react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { 
-  FaTachometerAlt, 
-  FaBox, 
-  FaShoppingCart, 
-  FaStar, 
-  FaPaintBrush, 
-  FaUsers, 
-  FaSignOutAlt, 
-  FaCreditCard,
-  FaHome
-} from 'react-icons/fa';
-import { useAuth } from '../../contexts/AuthContext';
+import { NavLink, useLocation } from 'react-router-dom';
+import { FaCreditCard, FaHome, FaBox, FaStar } from 'react-icons/fa';
 import '../../styles/admin/AdminSidebar.css';
 
 const AdminSidebar = () => {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login');
-    } catch (error) {
-      console.error('Failed to log out', error);
-    }
-  };
 
   // Check if a nav item is active
   const isActive = (path) => {
@@ -37,10 +15,9 @@ const AdminSidebar = () => {
   // Navigation items
   const navItems = [
     { 
-      path: '/', 
-      label: 'Dashboard', 
-      icon: <FaTachometerAlt className="nav-icon" />,
-      exact: true
+      path: '/payments', 
+      label: 'Payments', 
+      icon: <FaCreditCard className="nav-icon" />
     },
     { 
       path: '/products', 
@@ -48,33 +25,9 @@ const AdminSidebar = () => {
       icon: <FaBox className="nav-icon" />
     },
     { 
-      path: '/orders', 
-      label: 'Orders', 
-      icon: <FaShoppingCart className="nav-icon" />,
-      badge: 5
-    },
-    { 
-      path: '/reviews', 
-      label: 'Reviews', 
-      icon: <FaStar className="nav-icon" />,
-      badge: 3,
-      badgeVariant: 'warning'
-    },
-    { 
-      path: '/custom-requests', 
-      label: 'Custom Requests', 
-      icon: <FaPaintBrush className="nav-icon" />,
-      badge: 2
-    },
-    { 
-      path: '/payments', 
-      label: 'Payments', 
-      icon: <FaCreditCard className="nav-icon" />
-    },
-    { 
-      path: '/users', 
-      label: 'Users', 
-      icon: <FaUsers className="nav-icon" />
+      path: '/custom-products', 
+      label: 'Custom Products', 
+      icon: <FaStar className="nav-icon" />
     }
   ];
 
@@ -87,19 +40,15 @@ const AdminSidebar = () => {
       <nav className="sidebar-nav">
         <ul>
           {navItems.map((item) => (
-            <li key={item.path} className={isActive(item.path) ? 'active' : ''}>
+            <li key={item.path}>
               <NavLink 
-                to={`/admin${item.path === '/' ? '' : item.path}`}
-                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                end={item.exact}
+                to={`/admin${item.path}`}
+                className={({ isActive: isActiveLink }) => 
+                  `nav-link ${isActiveLink || isActive(item.path) ? 'active' : ''}`
+                }
               >
                 {item.icon}
                 <span>{item.label}</span>
-                {item.badge && (
-                  <span className={`badge ${item.badgeVariant ? `badge-${item.badgeVariant}` : ''}`}>
-                    {item.badge}
-                  </span>
-                )}
               </NavLink>
             </li>
           ))}
@@ -111,11 +60,6 @@ const AdminSidebar = () => {
           <FaHome className="nav-icon" />
           <span>Back to Site</span>
         </NavLink>
-        
-        <button onClick={handleLogout} className="logout-btn">
-          <FaSignOutAlt className="logout-icon" />
-          <span>Logout</span>
-        </button>
       </div>
     </aside>
   );

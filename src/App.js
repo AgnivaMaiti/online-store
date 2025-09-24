@@ -18,7 +18,6 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
-import AdminPayments from "./pages/AdminPayments";
 import AdminPage from "./pages/AdminPage";
 
 // Styles
@@ -44,7 +43,6 @@ function AppContent() {
     <div className="App">
       <header>
         <Navbar cartCount={cartItems.length} />
-        <AuthNav />
       </header>
 
       <main>
@@ -70,7 +68,6 @@ function AppContent() {
           <Route path="/register" element={<Register />} />
           
           {/* --- Admin Routes --- */}
-          {/* Single admin route that handles all nested admin routes */}
           <Route 
             path="/admin/*" 
             element={

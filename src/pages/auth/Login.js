@@ -27,9 +27,8 @@ const Login = () => {
     if (signInError) {
       setError(signInError.message || 'Failed to sign in');
     } else if (data.user) {
-      // If user metadata contains an admin flag, redirect to admin dashboard
-      const isAdmin = data.user.user_metadata && data.user.user_metadata.is_admin;
-      navigate(isAdmin ? '/admin' : '/');
+      // On successful login, navigate to the homepage.
+      navigate('/');
     }
     
     setLoading(false);
