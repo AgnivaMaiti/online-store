@@ -93,6 +93,23 @@
 }
 
 /* Cart */
+.nav-admin .admin-panel-link {
+  color: #6a0dad;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  background-color: #f5f0ff;
+  border: 1px solid #e0d0ff;
+}
+
+.nav-admin .admin-panel-link:hover {
+  background-color: #e8dfff;
+  color: #5a00cc;
+}
+
 .nav-cart {
   position: relative;
 }

@@ -48,6 +48,13 @@ export default function Navbar({ cartCount }) {
         </div>
         
         <div className="nav-right">
+          {user?.user_metadata?.role === 'admin' && (
+            <div className="nav-admin">
+              <Link to="/admin" className="admin-panel-link">
+                Admin Panel
+              </Link>
+            </div>
+          )}
           <div className="nav-cart">
             <Link to="/cart" className="cart-link">
               <FiShoppingCart className="cart-icon" />
@@ -80,9 +87,6 @@ export default function Navbar({ cartCount }) {
                     </div>
                     <div className="user-info">
                       <div className="user-name">{user.email}</div>
-                      <div className="user-role">
-                        {user.role === 'admin' ? 'Administrator' : 'Customer'}
-                      </div>
                     </div>
                   </div>
                   <div className="dropdown-divider"></div>
