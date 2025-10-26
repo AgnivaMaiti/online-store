@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { FaCreditCard, FaHome, FaBox, FaStar } from 'react-icons/fa';
+import { FaCreditCard, FaHome, FaBox, FaStar, FaTags } from 'react-icons/fa';
 import '../../styles/admin/AdminSidebar.css';
 
 const AdminSidebar = () => {
@@ -28,6 +28,11 @@ const AdminSidebar = () => {
       path: '/custom-products', 
       label: 'Custom Products', 
       icon: <FaStar className="nav-icon" />
+    },
+    { 
+      path: '/categories', 
+      label: 'Categories', 
+      icon: <FaTags className="nav-icon" />
     }
   ];
 

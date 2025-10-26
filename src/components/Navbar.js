@@ -14,6 +14,7 @@ export default function Navbar({ cartCount }) {
       await signOut();
       setIsUserMenuOpen(false);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to sign out:', error);
     }
   };
@@ -35,9 +36,17 @@ export default function Navbar({ cartCount }) {
   return (
     <nav className="navbar">
       <div className="nav-container">
-        <div className="nav-logo">
-          <Link to="/" className="logo">Artwork Store</Link>
-        </div>
+        <Link to="/" className="nav-logo">
+          <img 
+            src="/log.jpg" 
+            alt="Artistic Deblina Logo" 
+            style={{ 
+              height: '50px',
+              width: 'auto',
+              objectFit: 'contain'
+            }} 
+          />
+        </Link>
         
         <div className="nav-links">
           <Link to="/" className="nav-link">Home</Link>

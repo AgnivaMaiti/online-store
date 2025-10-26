@@ -5,6 +5,7 @@ import AdminSidebar from '../components/admin/AdminSidebar';
 import AdminPayments from './admin/AdminPayments';
 import Products from './admin/Products';
 import CustomProducts from './admin/CustomProducts';
+import Categories from './admin/Categories';
 import '../styles/admin/AdminPage.css';
 
 const AdminPage = () => {
@@ -17,6 +18,7 @@ const AdminPage = () => {
           <Route path="payments" element={<AdminPayments />} />
           <Route path="products" element={<Products />} />
           <Route path="custom-products" element={<CustomProducts />} />
+          <Route path="categories" element={<Categories />} />
         </Routes>
       </main>
     </div>
