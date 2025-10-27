@@ -185,9 +185,9 @@ const Products = () => {
   };
   
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Products Management</h1>
+    <div className="p-4 sm:p-6 overflow-x-auto">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <h1 className="text-xl sm:text-2xl font-bold">Products Management</h1>
         <button
           onClick={() => {
             setShowForm(!showForm);
@@ -195,7 +195,7 @@ const Products = () => {
               resetForm();
             }
           }}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm sm:text-base"
         >
           {showForm ? 'Cancel' : 'Add New Product'}
         </button>
@@ -204,12 +204,12 @@ const Products = () => {
       {error && <ErrorMessage message={error} />}
 
       {showForm && (
-        <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-          <h3 className="text-xl font-semibold mb-4">
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md mb-6">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4">
             {editingProduct ? 'Edit Product' : 'Add New Product'}
           </h3>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Name</label>
                 <input
@@ -286,20 +286,20 @@ const Products = () => {
               </div>
             </div>
             
-            <div className="flex justify-end space-x-3 pt-4">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
               <button
                 type="button"
                 onClick={resetForm}
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                className="w-full sm:w-auto px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
               >
-                {loading ? 'Saving...' : 'Save Product'}
+                {loading ? (editingProduct ? 'Updating...' : 'Creating...') : (editingProduct ? 'Update Product' : 'Create Product')}
               </button>
             </div>
           </form>
@@ -309,52 +309,84 @@ const Products = () => {
       {loading && !products.length ? (
         <LoadingSpinner />
       ) : (
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                <th className="hidden xs:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
+                <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {products.length === 0 ? (
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rating</th>
-                  <th className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
+                  <td colSpan="6" className="px-3 sm:px-6 py-4 text-center text-sm text-gray-500">
+                    No products found. Add your first product!
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {products.length > 0 ? (
-                  products.map((product) => (
-                    <tr key={product.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
+              ) : (
+                products.map((product) => (
+                  <tr key={product.id} className="hover:bg-gray-50">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                      {product.image ? (
                         <img 
-                          src={product.image || 'https://via.placeholder.com/40'} 
+                          src={product.image} 
                           alt={product.name} 
-                          className="h-10 w-10 rounded-full object-cover"
+                          className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover"
+                          loading="lazy"
                         />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {product.category_name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹{parseFloat(product.price || 0).toFixed(2)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.rating || 'N/A'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button onClick={() => handleEdit(product)} className="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
-                        <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-900">Delete</button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="px-6 py-4 text-center text-sm text-gray-500">
-                      No products found. Add your first product to get started.
+                      ) : (
+                        <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-[10px] sm:text-xs text-gray-500">No Img</span>
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-3 sm:px-6 py-4">
+                      <div className="text-sm font-medium text-gray-900 line-clamp-1">{product.name}</div>
+                      <div className="text-xs text-gray-500 line-clamp-1 sm:line-clamp-2">{product.description}</div>
+                      <div className="sm:hidden text-xs text-gray-500 mt-1">{product.category_name}</div>
+                    </td>
+                    <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {product.category_name}
+                    </td>
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      ₹{parseFloat(product.price).toFixed(2)}
+                    </td>
+                    <td className="hidden xs:table-cell px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <span className="text-yellow-400">★</span>
+                        <span className="ml-1 text-sm text-gray-600">
+                          {product.rating ? product.rating.toFixed(1) : 'N/A'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1 sm:space-x-3">
+                      <button
+                        onClick={() => handleEdit(product)}
+                        className="text-blue-600 hover:text-blue-900 text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5 border border-blue-200 rounded hover:bg-blue-50"
+                        title="Edit"
+                      >
+                        <span className="hidden sm:inline">Edit</span>
+                        <span className="sm:hidden">✏️</span>
+                      </button>
+                      <button
+                        onClick={() => handleDelete(product.id)}
+                        className="text-red-600 hover:text-red-900 text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5 border border-red-200 rounded hover:bg-red-50"
+                        title="Delete"
+                      >
+                        <span className="hidden sm:inline">Delete</span>
+                        <span className="sm:hidden">🗑️</span>
+                      </button>
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

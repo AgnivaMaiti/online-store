@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FiShoppingCart, FiUser, FiLogOut, FiChevronDown } from "react-icons/fi";
+import { FiShoppingCart, FiUser, FiLogOut, FiChevronDown, FiMenu, FiX } from "react-icons/fi";
 import { useAuth } from '../contexts/AuthContext';
 import { useState, useRef, useEffect } from 'react';
 import '../styles/Navbar.css';
@@ -7,7 +7,9 @@ import '../styles/Navbar.css';
 export default function Navbar({ cartCount }) {
   const { user, signOut } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
   const handleSignOut = async () => {
     try {
@@ -19,23 +21,58 @@ export default function Navbar({ cartCount }) {
     }
   };
 
-  // Close menu when clicking outside
+  // Close menus when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
+      // Close user menu when clicking outside
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setIsUserMenuOpen(false);
       }
+      
+      // Close mobile menu when clicking outside
+      if (mobileMenuRef.current && 
+          !mobileMenuRef.current.contains(event.target) && 
+          !event.target.closest('.mobile-menu-btn')) {
+        setIsMobileMenuOpen(false);
+      }
     }
 
+    // Close mobile menu when route changes
+    const handleRouteChange = () => {
+      setIsMobileMenuOpen(false);
+    };
+
     document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('popstate', handleRouteChange);
+    
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('popstate', handleRouteChange);
     };
   }, []);
+
+  // Toggle mobile menu
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  // Close mobile menu when a nav link is clicked
+  const handleNavLinkClick = () => {
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <nav className="navbar">
       <div className="nav-container">
+        <button 
+          className="mobile-menu-btn" 
+          onClick={toggleMobileMenu}
+          aria-label="Toggle menu"
+          aria-expanded={isMobileMenuOpen}
+        >
+          {isMobileMenuOpen ? <FiX /> : <FiMenu />}
+        </button>
+        
         <Link to="/" className="nav-logo">
           <img 
             src="/log.jpg" 
@@ -48,13 +85,20 @@ export default function Navbar({ cartCount }) {
           />
         </Link>
         
-        <div className="nav-links">
-          <Link to="/" className="nav-link">Home</Link>
-          <Link to="/about" className="nav-link">About Us</Link>
-          <Link to="/products" className="nav-link">Products</Link>
-          <Link to="/customized" className="nav-link">Customized</Link>
-          <Link to="/contact" className="nav-link">Contact</Link>
+        <div className={`nav-links ${isMobileMenuOpen ? 'active' : ''}`} ref={mobileMenuRef}>
+          <Link to="/" className="nav-link" onClick={handleNavLinkClick}>Home</Link>
+          <Link to="/about" className="nav-link" onClick={handleNavLinkClick}>About Us</Link>
+          <Link to="/products" className="nav-link" onClick={handleNavLinkClick}>Products</Link>
+          <Link to="/customized" className="nav-link" onClick={handleNavLinkClick}>Customized</Link>
+          <Link to="/contact" className="nav-link" onClick={handleNavLinkClick}>Contact</Link>
         </div>
+        {isMobileMenuOpen && (
+          <div 
+            className="mobile-menu-overlay active" 
+            onClick={() => setIsMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+        )}
         
         <div className="nav-right">
           {user?.user_metadata?.role === 'admin' && (

@@ -2,28 +2,73 @@
 :root {
   --navbar-height: 70px;
   --sidebar-width: 250px;
+  --sidebar-collapsed-width: 70px;
   --primary-color: #6a0dad;
   --primary-dark: #4a0d73;
   --sidebar-bg: #1a202c;
   --sidebar-text: #e2e8f0;
   --sidebar-hover: #2d3748;
   --sidebar-active: #4f46e5;
+  --mobile-breakpoint: 1024px;
+  --sidebar-transition: all 0.3s ease;
 }
 
 .admin-sidebar {
   width: var(--sidebar-width);
-  height: calc(100vh - var(--navbar-height));
+  height: 100vh;
   position: fixed;
   left: 0;
-  top: var(--navbar-height);
+  top: 0;
   background: var(--sidebar-bg);
   color: var(--sidebar-text);
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 900;
-  transition: transform 0.3s ease;
+  z-index: 1000;
+  transition: var(--sidebar-transition);
   overflow-y: auto;
+  padding-top: var(--navbar-height);
+  transform: translateX(0);
+}
+
+/* Mobile menu toggle button */
+.sidebar-toggle {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1100;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1100;
+}
+
+/* Mobile overlay */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 900;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Sidebar Header */
@@ -54,7 +99,8 @@
   padding: 1rem 0;
   scrollbar-width: thin;
   scrollbar-color: #4a5568 #2d3748;
-  padding-bottom: 2rem; /* Add some space at the bottom */
+  padding-bottom: 2rem;
+  transition: var(--sidebar-transition);
 }
 
 /* Custom scrollbar for WebKit browsers */
@@ -118,6 +164,9 @@
   cursor: pointer;
   position: relative;
   border-radius: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .nav-link:hover {
@@ -146,6 +195,37 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Mobile styles */
+@media (max-width: 1023px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+    width: 280px;
+    z-index: 1000;
+  }
+
+  .admin-sidebar.active {
+    transform: translateX(0);
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .sidebar-toggle {
+    display: flex;
+  }
+
+  .sidebar-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .nav-link {
+    padding: 0.75rem 1rem;
+  }
+
+  .nav-icon {
+    font-size: 1.25rem;
+    margin-right: 1rem;
+  }
 }
 
 /* Add a subtle badge for notifications */

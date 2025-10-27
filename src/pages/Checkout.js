@@ -13,12 +13,14 @@ export default function Checkout(props) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
 
   const qrPayload = `artwork-store|amount:${amount}|ref:checkout`;
-  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrPayload)}`;
+  // Using the local QR code image
+  const qrSrc = '/qrcode.png';
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -31,12 +33,13 @@ export default function Checkout(props) {
       const paymentPayload = {
         user_id: props.user?.id || null,
         amount: Number(amount),
-        items: props.cartItems || [], // Use cart items directly
+        items: props.cartItems || [],
         status: 'paid',
         transaction_id: transactionId,
         name: name,
         phone: phone,
         email: email,
+        address: address,
         currency: 'INR'
         // created_at will use the default value from DB
       };
@@ -85,10 +88,26 @@ export default function Checkout(props) {
         <p>Your cart is empty. <a href="/products">Continue shopping</a></p>
       )}
 
-      <div style={{ margin: '16px 0' }}>
-        <p>Scan QR to pay (use UPI/your payment app). Pay the exact amount and save the transaction id.</p>
-        <img src={qrSrc} alt="Payment QR" width="300" height="300" />
-        <div style={{ marginTop: 8, fontSize: 13, color: '#555' }}>QR payload: {qrPayload}</div>
+      <div style={{ margin: '16px 0', textAlign: 'center' }}>
+        <p>Scan the QR code below to make payment using any UPI app</p>
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }}>
+          <img 
+            src={qrSrc} 
+            alt="Payment QR Code" 
+            style={{ 
+              maxWidth: '300px', 
+              height: 'auto',
+              border: '1px solid #eee',
+              borderRadius: '8px',
+              padding: '10px',
+              backgroundColor: 'white'
+            }} 
+          />
+        </div>
+        <p style={{ marginTop: '10px', fontWeight: 'bold' }}>Amount to pay: ₹{amount}</p>
+        <p style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>
+          After payment, please enter the transaction ID and your details below
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} style={{ maxWidth: 520 }}>
@@ -110,6 +129,19 @@ export default function Checkout(props) {
         <div style={{ marginBottom: 10 }}>
           <label htmlFor="email">Email</label>
           <input id="email" name="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" style={{ width: '100%', padding: 8 }} />
+        </div>
+
+        <div style={{ marginBottom: 10 }}>
+          <label htmlFor="address">Full Address & PIN Code</label>
+          <textarea 
+            id="address" 
+            name="address" 
+            required 
+            value={address} 
+            onChange={(e) => setAddress(e.target.value)} 
+            placeholder="Enter your full address with PIN code" 
+            style={{ width: '100%', padding: 8, minHeight: '80px' }} 
+          />
         </div>
 
         <button type="submit" disabled={loading} style={{ padding: '10px 16px' }}>

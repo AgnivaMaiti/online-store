@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../services/supabaseClient';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorMessage from '../../components/common/ErrorMessage';
+import { FaMapMarkerAlt, FaTimes } from 'react-icons/fa';
 import '../../../src/styles/admin/AdminPayments.css';
 
 export default function AdminPayments() {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedAddress, setSelectedAddress] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -117,6 +119,7 @@ export default function AdminPayments() {
                 <th>Transaction ID</th>
                 <th>Customer</th>
                 <th>Contact</th>
+                <th>Address</th>
                 <th>Amount</th>
                 <th>Items</th>
                 <th>Date</th>
@@ -132,6 +135,20 @@ export default function AdminPayments() {
                   </td>
                   <td className="contact-info">
                     {payment.phone || 'No phone'}
+                  </td>
+                  <td className="address-cell">
+                    {payment.address ? (
+                      <button 
+                        onClick={() => setSelectedAddress(payment.address)}
+                        className="address-button"
+                        title="View full address"
+                      >
+                        <FaMapMarkerAlt className="inline mr-1" />
+                        View Address
+                      </button>
+                    ) : (
+                      <span className="text-gray-400">No address</span>
+                    )}
                   </td>
                   <td className="payment-amount">₹{parseFloat(payment.amount || 0).toFixed(2)}</td>
                   <td className="payment-items">
@@ -158,6 +175,34 @@ export default function AdminPayments() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      {/* Address Modal */}
+      {selectedAddress && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">Shipping Address</h3>
+              <button 
+                onClick={() => setSelectedAddress(null)}
+                className="text-gray-500 hover:text-gray-700"
+                aria-label="Close"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <div className="whitespace-pre-line bg-gray-50 p-4 rounded">
+              {selectedAddress}
+            </div>
+            <div className="mt-6 text-right">
+              <button
+                onClick={() => setSelectedAddress(null)}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
