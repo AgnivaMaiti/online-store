@@ -2,12 +2,29 @@ import { Link } from 'react-router-dom';
 
 export default function Home() {
   return (
-    <div className="home-container">
-      <div className="banner-container">
+    <div className="home-container" style={{ width: '100%', overflow: 'hidden' }}>
+      <div className="banner-container" style={{
+        width: '100%',
+        maxWidth: '100%',
+        overflow: 'hidden',
+        position: 'relative',
+        margin: '0',
+        padding: '0'
+      }}>
         <img 
           src="/images/banner.jpg" 
           alt="Artistic Deblina - Handmade Artworks" 
-          className="banner-image"
+          style={{
+            width: '100%',
+            height: 'auto',
+            display: 'block',
+            maxHeight: '60vh',
+            objectFit: 'cover',
+            objectPosition: 'center',
+            margin: '0',
+            padding: '0',
+            border: 'none'
+          }}
         />
       </div>
       <div className="content-container" style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
