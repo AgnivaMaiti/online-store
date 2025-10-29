@@ -87,7 +87,6 @@ export default function Navbar({ cartCount }) {
         
         <div className={`nav-links ${isMobileMenuOpen ? 'active' : ''}`} ref={mobileMenuRef}>
           <Link to="/" className="nav-link" onClick={handleNavLinkClick}>Home</Link>
-          <Link to="/about" className="nav-link" onClick={handleNavLinkClick}>About Us</Link>
           <Link to="/products" className="nav-link" onClick={handleNavLinkClick}>Products</Link>
           <Link to="/customized" className="nav-link" onClick={handleNavLinkClick}>Customized</Link>
           <Link to="/contact" className="nav-link" onClick={handleNavLinkClick}>Contact</Link>
