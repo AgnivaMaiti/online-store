@@ -81,7 +81,21 @@ export default function Customized() {
 
   if (success) {
     return (
-      <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10 text-center">
+      <div style={{
+      maxWidth: '600px',
+      margin: '0 auto',
+      padding: '40px',
+      backgroundColor: 'white',
+      borderRadius: '8px',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      textAlign: 'center',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: '90%',
+      maxWidth: '600px'
+    }}>
         <div className="text-green-500 text-5xl mb-4">✓</div>
         <h2 className="text-2xl font-bold mb-4">Request Submitted Successfully!</h2>
         <p className="text-gray-600">We've received your custom artwork request. Our team will review it and get back to you soon.</p>
@@ -91,7 +105,41 @@ export default function Customized() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
+    <div style={{
+      display: 'flex',
+      minHeight: '100vh',
+      padding: '20px',
+      backgroundColor: '#f9fafb',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      {/* Left Image */}
+      <div style={{
+        flex: '1',
+        display: 'flex',
+        justifyContent: 'center',
+        padding: '20px',
+        maxWidth: '30%'
+      }}>
+        <img 
+          src="/images/imgb1.jpg" 
+          alt="Custom Artwork Example 1" 
+          style={{
+            maxWidth: '100%',
+            maxHeight: '600px',
+            objectFit: 'contain',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}
+        />
+      </div>
+
+      {/* Form */}
+      <div className="max-w-2xl w-full p-8 bg-white rounded-lg shadow-lg" style={{
+        zIndex: 1,
+        maxWidth: '600px',
+        margin: '0 20px'
+      }}>
       <h2 className="text-2xl font-bold mb-6 text-gray-800">Request a Customized Artwork</h2>
       
       {error && (
@@ -172,6 +220,28 @@ export default function Customized() {
           </button>
         </div>
       </form>
+      </div>
+
+      {/* Right Image */}
+      <div style={{
+        flex: '1',
+        display: 'flex',
+        justifyContent: 'center',
+        padding: '20px',
+        maxWidth: '30%'
+      }}>
+        <img 
+          src="/images/imgb2.jpg" 
+          alt="Custom Artwork Example 2" 
+          style={{
+            maxWidth: '100%',
+            maxHeight: '600px',
+            objectFit: 'contain',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}
+        />
+      </div>
     </div>
   );
-}
+};

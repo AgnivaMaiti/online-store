@@ -35,7 +35,7 @@ export default function ProductCard({ product, addToCart }) {
           <span 
             key={index}
             style={{
-              backgroundColor: "#f0f0f0",
+              backgroundColor: "#F3E8FF",
               color: "#333",
               padding: "3px 8px",
               borderRadius: "12px",
@@ -50,25 +50,15 @@ export default function ProductCard({ product, addToCart }) {
       <p style={{ 
         fontSize: "1.2em",
         fontWeight: "bold",
-        color: "#2c3e50",
+        color: "#4C1D95",
         margin: "5px 0"
       }}>₹{product.price}</p>
-      <p style={{ 
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "5px",
-        color: "#f39c12",
-        margin: "5px 0"
-      }}>
-        ⭐ {product.rating}
-      </p>
       <button 
         onClick={() => addToCart(product)} 
         style={{ 
           padding: "8px 15px",
           marginTop: "auto",
-          backgroundColor: "#3498db",
+          backgroundColor: "#8B5CF6",
           color: "white",
           border: "none",
           borderRadius: "4px",
@@ -76,8 +66,8 @@ export default function ProductCard({ product, addToCart }) {
           transition: "background-color 0.2s",
           fontSize: "0.9em"
         }}
-        onMouseOver={(e) => e.target.style.backgroundColor = "#2980b9"}
-        onMouseOut={(e) => e.target.style.backgroundColor = "#3498db"}
+        onMouseOver={(e) => e.target.style.backgroundColor = "#7C3AED"}
+        onMouseOut={(e) => e.target.style.backgroundColor = "#8B5CF6"}
       >
         Add to Cart
       </button>

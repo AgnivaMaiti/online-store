@@ -14,7 +14,6 @@ const Products = () => {
     description: '',
     price: '',
     image: '',
-    rating: 0,
     category: ''
   });
   const [categories, setCategories] = useState([]);
@@ -98,8 +97,7 @@ const Products = () => {
       description: '',
       price: '',
       image: '',
-      rating: 0,
-      category: ''
+        category: ''
     });
     setEditingProduct(null);
     setShowForm(false);
@@ -115,7 +113,6 @@ const Products = () => {
         description: formData.description,
         price: parseFloat(formData.price),
         image: formData.image,
-        rating: parseInt(formData.rating, 10),
         category: formData.category
       };
 
@@ -156,7 +153,6 @@ const Products = () => {
       description: product.description || '',
       price: product.price?.toString() || '',
       image: product.image || '',
-      rating: product.rating || 0,
       category: product.category || ''
     });
     setShowForm(true);
@@ -251,19 +247,6 @@ const Products = () => {
                   required
                 />
               </div>
-               <div>
-                <label className="block text-sm font-medium text-gray-700">Rating (0-5)</label>
-                <input
-                  type="number"
-                  name="rating"
-                  value={formData.rating}
-                  onChange={handleInputChange}
-                  step="0.1"
-                  min="0"
-                  max="5"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700">Description</label>
                 <textarea
@@ -317,7 +300,6 @@ const Products = () => {
                 <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                 <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
                 <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                <th className="hidden xs:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
                 <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -355,14 +337,6 @@ const Products = () => {
                     </td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       ₹{parseFloat(product.price).toFixed(2)}
-                    </td>
-                    <td className="hidden xs:table-cell px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <span className="text-yellow-400">★</span>
-                        <span className="ml-1 text-sm text-gray-600">
-                          {product.rating ? product.rating.toFixed(1) : 'N/A'}
-                        </span>
-                      </div>
                     </td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1 sm:space-x-3">
                       <button

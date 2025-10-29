@@ -7,7 +7,7 @@
 6 silly config load:file:C:\Users\KIIT\AppData\Roaming\npm\etc\npmrc
 7 verbose title npm run dev
 8 verbose argv "run" "dev"
-9 verbose logfile logs-max:10 dir:C:\Users\KIIT\artwork-store\${HOME}\.npm-cache\_logs\2025-10-26T10_32_37_210Z-
-10 verbose logfile C:\Users\KIIT\artwork-store\${HOME}\.npm-cache\_logs\2025-10-26T10_32_37_210Z-debug-0.log
+9 verbose logfile logs-max:10 dir:C:\Users\KIIT\artwork-store\${HOME}\.npm-cache\_logs\2025-10-27T11_36_13_585Z-
+10 verbose logfile C:\Users\KIIT\artwork-store\${HOME}\.npm-cache\_logs\2025-10-27T11_36_13_585Z-debug-0.log
 11 silly logfile start cleaning logs, removing 1 files
 12 silly logfile done cleaning log files
