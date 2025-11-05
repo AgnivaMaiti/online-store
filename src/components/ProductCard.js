@@ -1,5 +1,13 @@
 // src/components/ProductCard.js
+import { useNavigate } from 'react-router-dom';
+
 export default function ProductCard({ product, addToCart }) {
+  const navigate = useNavigate();
+
+  const navigateToProduct = () => {
+    navigate(`/products/${product.id}`);
+  };
+
   return (
     <div style={{
       border: "1px solid #ddd",
@@ -13,17 +21,23 @@ export default function ProductCard({ product, addToCart }) {
       flexDirection: "column",
       gap: "10px"
     }}>
-      <img 
-        src={product.image} 
-        alt={product.name} 
-        style={{ 
-          width: "100%", 
-          height: "150px", 
-          objectFit: "cover",
-          borderRadius: "4px"
-        }} 
-      />
-      <h3 style={{ margin: "5px 0" }}>{product.name}</h3>
+      <div 
+        onClick={navigateToProduct}
+        style={{ cursor: 'pointer' }}
+      >
+        <img 
+          src={product.image} 
+          alt={product.name} 
+          style={{ 
+            width: "100%", 
+            height: "150px", 
+            objectFit: "cover",
+            borderRadius: "4px",
+            marginBottom: '10px'
+          }} 
+        />
+        <h3 style={{ margin: "5px 0" }}>{product.name}</h3>
+      </div>
       <div style={{ 
         display: "flex", 
         flexWrap: "wrap", 

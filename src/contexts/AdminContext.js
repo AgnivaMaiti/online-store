@@ -29,7 +29,7 @@ export const AdminProvider = ({ children }) => {
     try {
       setLoading(true);
       
-      // Fetch orders with related payment and user data
+      // First, fetch orders with payments
       const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
         .select(`
@@ -41,11 +41,6 @@ export const AdminProvider = ({ children }) => {
             payment_method,
             transaction_id,
             created_at as payment_date
-          ),
-          profiles (
-            id,
-            email,
-            full_name
           )
         `)
         .order('created_at', { ascending: false });
@@ -59,14 +54,32 @@ export const AdminProvider = ({ children }) => {
       }
 
       // Format the orders data with safe defaults
-      const formattedOrders = ordersData.map(order => {
+      const formattedOrders = await Promise.all(ordersData.map(async (order) => {
         // Get the most recent payment if available
         const payment = order.payments && order.payments.length > 0 
           ? order.payments[0] 
           : null;
-          
-        // Get user info
-        const user = order.profiles || {};
+        
+        // Fetch user info separately if needed
+        let userEmail = `user_${order.user_id?.substring(0, 6) || 'unknown'}`;
+        let userName = 'Unknown User';
+        
+        if (order.user_id) {
+          try {
+            const { data: userData, error: userError } = await supabase
+              .from('profiles')
+              .select('email, full_name')
+              .eq('id', order.user_id)
+              .single();
+              
+            if (userData && !userError) {
+              userEmail = userData.email || userEmail;
+              userName = userData.full_name || userName;
+            }
+          } catch (err) {
+            console.error('Error fetching user data:', err);
+          }
+        }
         
         return {
           id: order.id,
@@ -79,8 +92,8 @@ export const AdminProvider = ({ children }) => {
           payment_status: payment?.payment_status || 'pending',
           
           // User info
-          user_email: user.email || `user_${order.user_id?.substring(0, 6) || 'unknown'}`,
-          user_name: user.full_name || 'Unknown User',
+          user_email: userEmail,
+          user_name: userName,
           
           // Payment info
           payment_id: payment?.id,
@@ -92,7 +105,7 @@ export const AdminProvider = ({ children }) => {
           // Original data
           _raw: order
         };
-      });
+      }));
 
       setOrders(formattedOrders);
     } catch (err) {

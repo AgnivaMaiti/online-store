@@ -2,6 +2,8 @@ import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { AdminProvider } from "./contexts/AdminContext";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Components
 import Navbar from "./components/Navbar";
@@ -11,6 +13,7 @@ import AdminRoute from "./components/AdminRoute"; // Correctly imported
 // Pages
 import Home from "./pages/Home";
 import Products from "./pages/Products";
+import ProductDetail from "./pages/ProductDetail";
 import Customized from "./pages/Customized";
 import Contact from "./pages/Contact";
 import Cart from "./pages/Cart";
@@ -45,12 +48,17 @@ function AppContent() {
       </header>
 
       <main>
+        <ToastContainer position="bottom-right" autoClose={3000} />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route 
             path="/products" 
             element={<Products addToCart={addToCart} />} 
+          />
+          <Route 
+            path="/products/:id" 
+            element={<ProductDetail addToCart={addToCart} />} 
           />
           <Route path="/customized" element={<Customized />} />
           <Route path="/contact" element={<Contact />} />
