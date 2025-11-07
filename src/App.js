@@ -93,7 +93,8 @@ function AppContent() {
         backgroundColor: '#f8f9fa', 
         padding: '2rem 1rem',
         marginTop: '2rem',
-        borderTop: '1px solid #e9ecef'
+        borderTop: '1px solid #e9ecef',
+        color: '#000000'
       }}>
         <div style={{ 
           maxWidth: '1200px', 
@@ -102,33 +103,40 @@ function AppContent() {
           flexDirection: 'column',
           alignItems: 'center',
           gap: '1rem',
-          textAlign: 'center'
+          textAlign: 'center',
+          color: '#000000'
         }}>
           <div style={{ 
             display: 'flex',
             flexWrap: 'wrap',
             justifyContent: 'center',
             gap: '2rem',
-            marginBottom: '1rem'
+            marginBottom: '1rem',
+            color: '#000000'
           }}>
-            <div>
-              <h4>Contact Us</h4>
-              <p>Email: artifydeblina@gmail.com</p>
-              <p>Phone: +91 9064591162</p>
+            <div style={{ color: '#000000' }}>
+              <h4 style={{ color: '#000000', marginBottom: '0.5rem' }}>Contact Us</h4>
+              <p style={{ color: '#000000', margin: '0.25rem 0' }}>Email: artifydeblina@gmail.com</p>
+              <p style={{ color: '#000000', margin: '0.25rem 0' }}>Phone: +91 9064591162</p>
             </div>
-            <div>
-              <h4>Follow Us</h4>
+            <div style={{ color: '#000000' }}>
+              <h4 style={{ color: '#000000', marginBottom: '0.5rem' }}>Follow Us</h4>
               <a 
                 href="https://www.instagram.com/artistic_deblina" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                style={{ color: '#333', textDecoration: 'none' }}
+                style={{ 
+                  color: '#000000', 
+                  textDecoration: 'none',
+                  display: 'block',
+                  margin: '0.25rem 0'
+                }}
               >
                 Instagram
               </a>
             </div>
           </div>
-          <p style={{ margin: 0, color: '#6c757d' }}>
+          <p style={{ margin: 0, color: '#000000' }}>
             &copy; {new Date().getFullYear()} Artistic Deblina. All rights reserved.
           </p>
         </div>
