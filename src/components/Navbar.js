@@ -89,7 +89,6 @@ export default function Navbar({ cartCount }) {
           <Link to="/" className="nav-link" onClick={handleNavLinkClick}>Home</Link>
           <Link to="/products" className="nav-link" onClick={handleNavLinkClick}>Products</Link>
           <Link to="/customized" className="nav-link" onClick={handleNavLinkClick}>Customized</Link>
-          <Link to="/contact" className="nav-link" onClick={handleNavLinkClick}>Contact</Link>
         </div>
         {isMobileMenuOpen && (
           <div 

@@ -7,8 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 // Components
 import Navbar from "./components/Navbar";
-import AuthNav from "./components/AuthNav";
-import AdminRoute from "./components/AdminRoute"; // Correctly imported
+import AdminRoute from "./components/AdminRoute";
 
 // Pages
 import Home from "./pages/Home";
@@ -29,9 +28,8 @@ import './App.css';
 function AppContent() {
   const [cartItems, setCartItems] = useState([]);
   
-  // NOTE: The useAuth hook returns 'user', not 'currentUser'. This is not used here but is important.
-  // The AdminRoute component will handle the user and isAdmin logic internally.
-  const { user } = useAuth(); 
+  // The AdminRoute component will handle the user and isAdmin logic internally
+  useAuth(); 
 
   const addToCart = (product) => {
     setCartItems([...cartItems, product]);
@@ -51,7 +49,10 @@ function AppContent() {
         <ToastContainer position="bottom-right" autoClose={3000} />
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<Home />} />
+          <Route 
+            path="/" 
+            element={<Home addToCart={addToCart} />} 
+          />
           <Route 
             path="/products" 
             element={<Products addToCart={addToCart} />} 
@@ -88,8 +89,49 @@ function AppContent() {
         </Routes>
       </main>
 
-      <footer>
-        <p>&copy; {new Date().getFullYear()} Artwork Store. All rights reserved.</p>
+      <footer style={{ 
+        backgroundColor: '#f8f9fa', 
+        padding: '2rem 1rem',
+        marginTop: '2rem',
+        borderTop: '1px solid #e9ecef'
+      }}>
+        <div style={{ 
+          maxWidth: '1200px', 
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '1rem',
+          textAlign: 'center'
+        }}>
+          <div style={{ 
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: '2rem',
+            marginBottom: '1rem'
+          }}>
+            <div>
+              <h4>Contact Us</h4>
+              <p>Email: artifydeblina@gmail.com</p>
+              <p>Phone: +91 9064591162</p>
+            </div>
+            <div>
+              <h4>Follow Us</h4>
+              <a 
+                href="https://www.instagram.com/artistic_deblina" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ color: '#333', textDecoration: 'none' }}
+              >
+                Instagram
+              </a>
+            </div>
+          </div>
+          <p style={{ margin: 0, color: '#6c757d' }}>
+            &copy; {new Date().getFullYear()} Artistic Deblina. All rights reserved.
+          </p>
+        </div>
       </footer>
     </div>
   );
