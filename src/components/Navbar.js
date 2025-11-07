@@ -86,9 +86,19 @@ export default function Navbar({ cartCount }) {
         </Link>
         
         <div className={`nav-links ${isMobileMenuOpen ? 'active' : ''}`} ref={mobileMenuRef}>
-          <Link to="/" className="nav-link" onClick={handleNavLinkClick}>Home</Link>
-          <Link to="/products" className="nav-link" onClick={handleNavLinkClick}>Products</Link>
-          <Link to="/customized" className="nav-link" onClick={handleNavLinkClick}>Customized</Link>
+          <Link to="/" className="nav-link" onClick={handleNavLinkClick}   style={{ color: '#000000' }}
+>Home</Link>
+          <Link to="/products" className="nav-link" onClick={handleNavLinkClick}   style={{ color: '#000000' }}
+>Products</Link>
+
+<Link 
+  to="/customized" 
+  className="nav-link" 
+  onClick={handleNavLinkClick}
+  style={{ color: '#000000' }}
+>
+  Customized
+</Link>
         </div>
         {isMobileMenuOpen && (
           <div 

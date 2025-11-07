@@ -212,7 +212,7 @@ export default function Home({ addToCart }) {
           <h2 style={{
             textAlign: 'center',
             marginBottom: '30px',
-            color: '#333',
+            color: '#000000ff',
             position: 'relative',
             paddingBottom: '10px',
             fontSize: '2em',
