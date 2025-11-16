@@ -104,30 +104,7 @@ function AppContent() {
           gap: '1rem',
           textAlign: 'center'
         }}>
-          <div style={{ 
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: '2rem',
-            marginBottom: '1rem'
-          }}>
-            <div>
-              <h4>Contact Us</h4>
-              <p>Email: artifydeblina@gmail.com</p>
-              <p>Phone: +91 9064591162</p>
-            </div>
-            <div>
-              <h4>Follow Us</h4>
-              <a 
-                href="https://www.instagram.com/artistic_deblina" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                style={{ color: '#333', textDecoration: 'none' }}
-              >
-                Instagram
-              </a>
-            </div>
-          </div>
+         
           <p style={{ margin: 0, color: '#6c757d' }}>
             &copy; {new Date().getFullYear()} Artistic Deblina. All rights reserved.
           </p>

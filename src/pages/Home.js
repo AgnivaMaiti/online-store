@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import { supabase } from '../supabaseClient';
+import { FaEnvelope, FaWhatsapp, FaInstagram } from 'react-icons/fa';
 
 // Carousel component
 const ImageCarousel = () => {
@@ -21,7 +22,7 @@ const ImageCarousel = () => {
       setCurrentSlide((prev) => (prev + 1) % carouselImages.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [carouselImages.length]);
 
   return (
     <div style={{ 
@@ -92,12 +93,13 @@ export default function Home({ addToCart }) {
         const { data, error } = await supabase
           .from('products')
           .select('*')
-          .limit(5); // Get first 5 products
+          .order('rating', { ascending: false }) // Sort by rating in descending order
+          .limit(4); // Get top 4 highest rated products
           
         if (error) throw error;
         setFeaturedProducts(data || []);
       } catch (error) {
-        console.error('Error fetching featured products:', error);
+        // Error fetching featured products
       } finally {
         setLoading(false);
       }
@@ -276,45 +278,72 @@ export default function Home({ addToCart }) {
           </div>
         </div>
         
-        {/* About Section */}
-        <div className="about-section" style={{
-          backgroundColor: '#f8f9fa',
-          padding: '30px',
-          borderRadius: '8px',
+
+        {/* Contact Section */}
+        <div style={{
           marginTop: '60px',
+          textAlign: 'center',
+          padding: '30px 20px',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '8px',
           boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
         }}>
           <h2 style={{
             textAlign: 'center',
-            marginBottom: '20px',
+            marginBottom: '25px',
             color: '#333',
             position: 'relative',
             paddingBottom: '10px',
             fontSize: '1.8em',
             fontWeight: '600'
           }}>
-            About Deblina
+            Contact Us
             <div style={{
               height: '3px',
-              width: '60px',
+              width: '80px',
               backgroundColor: '#8B5CF6',
               margin: '15px auto 0',
               borderRadius: '3px'
             }}></div>
           </h2>
-          <p style={{ 
-            marginBottom: '15px', 
-            textAlign: 'center', 
-            maxWidth: '800px', 
-            marginLeft: 'auto', 
-            marginRight: 'auto',
-            lineHeight: '1.7',
-            fontSize: '1.05em'
+          
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '15px',
+            maxWidth: '400px',
+            margin: '0 auto',
+            textAlign: 'left'
           }}>
-            Deblina Mukherjee is a contemporary artist specializing in watercolor and acrylic paintings. 
-            Her work is a celebration of imperfection and the beauty found in the details that make each 
-            piece unique and meaningful.
-          </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <FaEnvelope size={20} color="#8B5CF6" />
+              <span>Email: artisticdeblina@gmail.com</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <FaWhatsapp size={20} color="#25D366" />
+              <span>+91 9051233055</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
+              <a 
+                href="https://www.instagram.com/artisticdeblina/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '10px',
+                  color: '#333',
+                  textDecoration: 'none',
+                  transition: 'color 0.2s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.color = '#8B5CF6'}
+                onMouseOut={(e) => e.currentTarget.style.color = '#333'}
+              >
+                <FaInstagram size={20} color="#E1306C" />
+                <span>@artisticdeblina</span>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
