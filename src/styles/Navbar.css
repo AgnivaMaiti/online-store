@@ -179,6 +179,117 @@
   margin-left: auto;
 }
 
+/* User menu */
+.user-menu-container {
+  position: relative;
+}
+
+.user-menu-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+}
+
+.user-menu-button:hover {
+  background: var(--light-gray);
+}
+
+.user-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--light-gray);
+}
+
+.user-icon {
+  font-size: 1rem;
+}
+
+.user-email {
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.dropdown-icon {
+  transition: transform 0.2s ease;
+}
+
+.dropdown-icon.open {
+  transform: rotate(180deg);
+}
+
+.user-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: #fff;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  border-radius: 10px;
+  width: 240px;
+  z-index: 1100;
+  overflow: hidden;
+}
+
+.user-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 12px 14px;
+  background: #fafafa;
+}
+
+.user-avatar-large {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--light-gray);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-icon-large {
+  font-size: 1.1rem;
+}
+
+.user-info .user-name {
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--border-color);
+}
+
+.dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: transparent; /* override global button styles */
+  color: var(--text-color);
+  border: none;            /* override global button styles */
+  border-radius: 0;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background: #f5f5f5;
+}
+
 /* Cart */
 .nav-admin .admin-panel-link {
   color: #6a0dad;

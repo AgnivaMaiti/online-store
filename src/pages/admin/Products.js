@@ -14,7 +14,8 @@ const Products = () => {
     description: '',
     price: '',
     image: '',
-    category: ''
+    category: '',
+    featured: false
   });
   const [categories, setCategories] = useState([]);
 
@@ -97,7 +98,8 @@ const Products = () => {
       description: '',
       price: '',
       image: '',
-        category: ''
+        category: '',
+        featured: false
     });
     setEditingProduct(null);
     setShowForm(false);
@@ -113,7 +115,8 @@ const Products = () => {
         description: formData.description,
         price: parseFloat(formData.price),
         image: formData.image,
-        category: formData.category
+        category: formData.category,
+        featured: !!formData.featured
       };
 
       if (editingProduct) {
@@ -153,7 +156,8 @@ const Products = () => {
       description: product.description || '',
       price: product.price?.toString() || '',
       image: product.image || '',
-      category: product.category || ''
+      category: product.category || '',
+      featured: !!product.featured
     });
     setShowForm(true);
   };
@@ -247,6 +251,16 @@ const Products = () => {
                   required
                 />
               </div>
+              <div className="flex items-center gap-3 mt-2">
+                <input
+                  id="featured"
+                  type="checkbox"
+                  checked={!!formData.featured}
+                  onChange={(e) => setFormData(prev => ({ ...prev, featured: e.target.checked }))}
+                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="featured" className="text-sm font-medium text-gray-700">Featured on homepage</label>
+              </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700">Description</label>
                 <textarea
@@ -315,14 +329,19 @@ const Products = () => {
                   <tr key={product.id} className="hover:bg-gray-50">
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       {product.image ? (
-                        <img 
-                          src={product.image} 
-                          alt={product.name} 
-                          className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover"
-                          loading="lazy"
-                        />
+                        <div
+                          className="rounded overflow-hidden"
+                          style={{ width: 40, height: 40 }}
+                        >
+                          <img 
+                            src={product.image} 
+                            alt={product.name} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            loading="lazy"
+                          />
+                        </div>
                       ) : (
-                        <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                        <div className="rounded-full bg-gray-200 flex items-center justify-center" style={{ width: 40, height: 40 }}>
                           <span className="text-[10px] sm:text-xs text-gray-500">No Img</span>
                         </div>
                       )}

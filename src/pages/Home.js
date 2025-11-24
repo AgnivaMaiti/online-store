@@ -93,8 +93,8 @@ export default function Home({ addToCart }) {
         const { data, error } = await supabase
           .from('products')
           .select('*')
-          .order('rating', { ascending: false }) // Sort by rating in descending order
-          .limit(4); // Get top 4 highest rated products
+          .eq('featured', true)
+          .limit(4);
           
         if (error) throw error;
         setFeaturedProducts(data || []);

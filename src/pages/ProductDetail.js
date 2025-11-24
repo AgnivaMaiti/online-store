@@ -138,7 +138,8 @@ export default function ProductDetail({ addToCart }) {
                     border: '1px solid #ddd',
                     background: '#f8f8f8',
                     cursor: 'pointer',
-                    fontSize: '1rem'
+                    fontSize: '1rem',
+                    color: '#333'
                   }}
                 >
                   -
@@ -158,7 +159,8 @@ export default function ProductDetail({ addToCart }) {
                     border: '1px solid #ddd',
                     background: '#f8f8f8',
                     cursor: 'pointer',
-                    fontSize: '1rem'
+                    fontSize: '1rem',
+                    color: '#333'
                   }}
                 >
                   +
